@@ -5,12 +5,14 @@ import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../_redux/store";
 import { setDone, setError, setLoading, setToken } from "../_redux/authSlice";
+import { useRouter } from "next/navigation";
 
 export default function Login() {
   const isLoading = useSelector(
     (store: RootState) => store.authReducer.isLoading
   );
   const dispatch = useDispatch();
+  const router = useRouter();
 
   async function login(values: { email: string; password: string }) {
     try {
@@ -33,8 +35,10 @@ export default function Login() {
         dispatch(setError(data.message || "Login failed"));
         return;
       }
-
       dispatch(setToken(data.token));
+      setTimeout(() => {
+        router.push("/");
+      }, 2000);
     } catch (err: any) {
       dispatch(setError(err.message || "Unknown error"));
     } finally {

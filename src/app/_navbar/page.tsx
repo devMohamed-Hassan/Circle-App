@@ -14,8 +14,13 @@ import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
 import Link from "next/link";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../_redux/store";
+import { useRouter } from "next/navigation";
+import { removeToken, setToken } from "../_redux/authSlice";
 
 function Navbar() {
+  const [mounted, setMounted] = React.useState(false);
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
   );
@@ -23,20 +28,37 @@ function Navbar() {
     null
   );
 
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const { token } = useSelector((state: RootState) => state.authReducer);
+  const isAuthenticated = Boolean(token);
+
+  React.useEffect(() => {
+    setMounted(true);
+    const storedToken = localStorage.getItem("userToken");
+    if (storedToken && !token) {
+      dispatch(setToken(storedToken));
+    }
+  }, [dispatch, token]);
+
+  if (!mounted) return null;
+
+  const logout = () => {
+    handleCloseUserMenu();
+    dispatch(removeToken());
+    router.push("/login");
+  };
+
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
   };
+
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
   };
 
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
-  };
-
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
-  };
+  const handleCloseNavMenu = () => setAnchorElNav(null);
+  const handleCloseUserMenu = () => setAnchorElUser(null);
 
   return (
     <AppBar position="static">
@@ -60,49 +82,33 @@ function Navbar() {
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
-            <IconButton
-              size="large"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-              color="inherit"
-            >
+            <IconButton onClick={handleOpenNavMenu} color="inherit">
               <MenuIcon />
             </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "left",
-              }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-              sx={{ display: { xs: "block", md: "none" } }}
-            >
-              <MenuItem
-                onClick={handleCloseNavMenu}
-                component={Link}
-                href="/profile"
+            {isAuthenticated && (
+              <Menu
+                anchorEl={anchorElNav}
+                open={Boolean(anchorElNav)}
+                onClose={handleCloseNavMenu}
               >
-                <Typography textAlign="center">Profile</Typography>
-              </MenuItem>
-
-              <MenuItem
-                onClick={handleCloseNavMenu}
-                component={Link}
-                href="/createpost"
-              >
-                <Typography textAlign="center">Create Post</Typography>
-              </MenuItem>
-            </Menu>
+                <MenuItem
+                  onClick={handleCloseNavMenu}
+                  component={Link}
+                  href="/profile"
+                >
+                  <Typography textAlign="center">Profile</Typography>
+                </MenuItem>
+                <MenuItem
+                  onClick={handleCloseNavMenu}
+                  component={Link}
+                  href="/createpost"
+                >
+                  <Typography textAlign="center">Create Post</Typography>
+                </MenuItem>
+              </Menu>
+            )}
           </Box>
+
           <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
           <Typography
             variant="h5"
@@ -120,60 +126,68 @@ function Navbar() {
           >
             <Link href={"/"}>Circle</Link>
           </Typography>
-          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-            <Button
-              component={Link}
-              href="/profile"
-              sx={{ my: 2, color: "white", display: "block" }}
-            >
-              Profile
-            </Button>
 
-            <Button
-              component={Link}
-              href="/createpost"
-              sx={{ my: 2, color: "white", display: "block" }}
-            >
-              Create Post
-            </Button>
-          </Box>
+          {isAuthenticated && (
+            <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
+              <Button component={Link} href="/profile" sx={{ color: "white" }}>
+                Profile
+              </Button>
+              <Button
+                component={Link}
+                href="/createpost"
+                sx={{ color: "white" }}
+              >
+                Create Post
+              </Button>
+            </Box>
+          )}
+
           <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="" />
-              </IconButton>
-            </Tooltip>
+            {isAuthenticated ? (
+              <Tooltip title="Open settings">
+                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                  <Avatar alt="User Avatar" src="" />
+                </IconButton>
+              </Tooltip>
+            ) : (
+              <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1 }}>
+                <Button component={Link} href="/login" sx={{ color: "white" }}>
+                  Login
+                </Button>
+                <Button
+                  component={Link}
+                  href="/register"
+                  sx={{ color: "white" }}
+                >
+                  Register
+                </Button>
+              </Box>
+            )}
+
             <Menu
-              sx={{ mt: "45px" }}
-              id="menu-appbar"
               anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
+              sx={{ mt: "45px" }}
             >
-              <MenuItem onClick={handleCloseUserMenu}>
-                <Typography sx={{ textAlign: "center" }}>
-                  <Link href={"/login"}>Login</Link>
-                </Typography>
-              </MenuItem>
-              <MenuItem onClick={handleCloseUserMenu}>
-                <Typography sx={{ textAlign: "center" }}>
-                  <Link href={"/register"}>Register</Link>
-                </Typography>
-              </MenuItem>
-              <MenuItem onClick={handleCloseUserMenu}>
-                <Typography sx={{ textAlign: "center" }}>
-                  <Link href={"/logout"}>Logout</Link>
-                </Typography>
-              </MenuItem>
+              {isAuthenticated ? (
+                <MenuItem onClick={logout}>
+                  <Typography textAlign="center">Logout</Typography>
+                </MenuItem>
+              ) : (
+                <Box>
+                  <MenuItem onClick={handleCloseUserMenu}>
+                    <Typography textAlign="center">
+                      <Link href="/login">Login</Link>
+                    </Typography>
+                  </MenuItem>
+                  <MenuItem onClick={handleCloseUserMenu}>
+                    <Typography textAlign="center">
+                      <Link href="/register">Register</Link>
+                    </Typography>
+                  </MenuItem>
+                </Box>
+              )}
             </Menu>
           </Box>
         </Toolbar>
@@ -181,4 +195,5 @@ function Navbar() {
     </AppBar>
   );
 }
+
 export default Navbar;

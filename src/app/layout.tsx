@@ -19,12 +19,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body
-        style={{ fontFamily: roboto.style.fontFamily, backgroundColor: "#fff" }}
+        style={{ fontFamily: roboto.style.fontFamily }}
       >
         <Provider store={store}>
           <AppRouterCacheProvider>
             <Navbar />
-            <Container maxWidth="sm" sx={{ mt: 10 }}>
+            <Container maxWidth="sm" sx={{ mt: 10, color: "#000000" }}>
               {children}
               <Toaster />
             </Container>
