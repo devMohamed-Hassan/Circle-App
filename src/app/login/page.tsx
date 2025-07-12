@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../_redux/store";
 import { setDone, setError, setLoading, setToken } from "../_redux/authSlice";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 export default function Login() {
   const isLoading = useSelector(
@@ -36,6 +37,7 @@ export default function Login() {
         return;
       }
       dispatch(setToken(data.token));
+      toast.success("Login success");
       setTimeout(() => {
         router.push("/");
       }, 2000);

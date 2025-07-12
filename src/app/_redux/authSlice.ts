@@ -29,7 +29,6 @@ const authSlice = createSlice({
       if (typeof window !== "undefined") {
         localStorage.setItem("userToken", action.payload);
       }
-      toast.success("Login success");
     },
     setError: (state, action) => {
       state.error = action.payload;
