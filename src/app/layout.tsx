@@ -13,7 +13,9 @@ const roboto = Roboto({
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body style={{ fontFamily: roboto.style.fontFamily }}>
+      <body
+        style={{ fontFamily: roboto.style.fontFamily, backgroundColor: "#fff" }}
+      >
         <Navbar />
         <AppRouterCacheProvider>{children}</AppRouterCacheProvider>
       </body>

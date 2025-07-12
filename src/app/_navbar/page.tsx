@@ -86,17 +86,21 @@ function Navbar() {
               onClose={handleCloseNavMenu}
               sx={{ display: { xs: "block", md: "none" } }}
             >
-              <Link href="/profile" passHref legacyBehavior>
-                <MenuItem onClick={handleCloseNavMenu}>
-                  <Typography textAlign="center">Profile</Typography>
-                </MenuItem>
-              </Link>
+              <MenuItem
+                onClick={handleCloseNavMenu}
+                component={Link}
+                href="/profile"
+              >
+                <Typography textAlign="center">Profile</Typography>
+              </MenuItem>
 
-              <Link href="/createpost" passHref legacyBehavior>
-                <MenuItem onClick={handleCloseNavMenu}>
-                  <Typography textAlign="center">Create Post</Typography>
-                </MenuItem>
-              </Link>
+              <MenuItem
+                onClick={handleCloseNavMenu}
+                component={Link}
+                href="/createpost"
+              >
+                <Typography textAlign="center">Create Post</Typography>
+              </MenuItem>
             </Menu>
           </Box>
           <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
@@ -118,16 +122,19 @@ function Navbar() {
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
             <Button
-              onClick={handleCloseNavMenu}
+              component={Link}
+              href="/profile"
               sx={{ my: 2, color: "white", display: "block" }}
             >
-              <Link href={"/profile"}>Profile</Link>
+              Profile
             </Button>
+
             <Button
-              onClick={handleCloseNavMenu}
+              component={Link}
+              href="/createpost"
               sx={{ my: 2, color: "white", display: "block" }}
             >
-              <Link href={"/createpost"}>Create Post</Link>
+              Create Post
             </Button>
           </Box>
           <Box sx={{ flexGrow: 0 }}>
