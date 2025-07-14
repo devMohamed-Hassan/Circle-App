@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getPosts } from "./_redux/postsSlice";
 import { RootState, StoreDispatch } from "./_redux/store";
+import PostDetails from "./_postDetails/page";
 
 export default function Home() {
   const router = useRouter();
@@ -28,7 +29,9 @@ export default function Home() {
 
   return (
     <>
-      <h2>Home</h2>
+      {posts.map((post) => (
+        <PostDetails key={post.id} post={post} />
+      ))}
     </>
   );
 }

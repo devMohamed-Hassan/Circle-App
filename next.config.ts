@@ -1,7 +1,17 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  /* config options here */
+const config: NextConfig = {
+  //https://linked-posts.routemisr.com/uploads/default-profile.png
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "linked-posts.routemisr.com",
+        pathname: "/uploads/**",
+        search: "",
+      },
+    ],
+  },
 };
 
-export default nextConfig;
+export default config;
