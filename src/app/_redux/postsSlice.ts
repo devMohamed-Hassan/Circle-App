@@ -4,6 +4,7 @@ import { Post } from "../interfaces";
 const initialState = {
   isLoading: false as Boolean,
   posts: [] as Post[],
+  post: null as Post | null,
   error: null as any,
 };
 
@@ -23,11 +24,31 @@ export const getPosts = createAsyncThunk("posts/getPosts", async () => {
   return data.posts;
 });
 
+export const getPost = createAsyncThunk(
+  "posts/getPost",
+  async (postId: string) => {
+    const response = await fetch(
+      `https://linked-posts.routemisr.com/posts/${postId}`,
+      {
+        method: "GET",
+        headers: {
+          token: `${localStorage.getItem("userToken")}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    const data = await response.json();
+    console.log(data);
+    return data.post;
+  }
+);
+
 const postSlice = createSlice({
   name: "post",
   initialState,
   reducers: {},
   extraReducers(builder) {
+    // all posts cases
     builder.addCase(getPosts.pending, (state) => {
       state.isLoading = true;
     });
@@ -36,6 +57,18 @@ const postSlice = createSlice({
       state.posts = action.payload;
     });
     builder.addCase(getPosts.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload;
+    });
+    // single post cases
+    builder.addCase(getPost.pending, (state) => {
+      state.isLoading = true;
+    });
+    builder.addCase(getPost.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.post = action.payload;
+    });
+    builder.addCase(getPost.rejected, (state, action) => {
       state.isLoading = false;
       state.error = action.payload;
     });

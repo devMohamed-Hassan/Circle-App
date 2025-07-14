@@ -49,7 +49,13 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
   ],
 }));
 
-export default function PostDetails({ post }: { post: Post }) {
+export default function PostDetails({
+  post,
+  isComment = false,
+}: {
+  post: Post;
+  isComment?: Boolean;
+}) {
   const [expanded, setExpanded] = React.useState(false);
 
   const handleExpandClick = () => {
@@ -185,6 +191,18 @@ export default function PostDetails({ post }: { post: Post }) {
                 <MoreVertIcon fontSize="small" />
               </IconButton>
             </Box>
+            <Link
+              href={`/singlepost/${post.id}`}
+              style={{
+                textAlign: "right",
+                color: "#09c",
+                width: "100%",
+                display: "block",
+              }}
+            >
+              {" "}
+              show all comments
+            </Link>
           </CardContent>
         )}
       </Collapse>
