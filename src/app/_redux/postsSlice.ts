@@ -20,7 +20,6 @@ export const getPosts = createAsyncThunk("posts/getPosts", async () => {
     }
   );
   const data = await response.json();
-  console.log(data);
   return data.posts;
 });
 
@@ -38,8 +37,26 @@ export const getPost = createAsyncThunk(
       }
     );
     const data = await response.json();
-    console.log(data);
     return data.post;
+  }
+);
+
+export const getUserPosts = createAsyncThunk(
+  "posts/getUserPosts",
+  async (userId: string) => {
+    const response = await fetch(
+      `https://linked-posts.routemisr.com/users/${userId}/posts`,
+      {
+        method: "GET",
+        headers: {
+          token: `${localStorage.getItem("userToken")}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    const data = await response.json();
+    console.log(data.posts);
+    return data.posts;
   }
 );
 
@@ -69,6 +86,18 @@ const postSlice = createSlice({
       state.post = action.payload;
     });
     builder.addCase(getPost.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload;
+    });
+    //user posts cases
+    builder.addCase(getUserPosts.pending, (state) => {
+      state.isLoading = true;
+    });
+    builder.addCase(getUserPosts.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.posts = action.payload;
+    });
+    builder.addCase(getUserPosts.rejected, (state, action) => {
       state.isLoading = false;
       state.error = action.payload;
     });

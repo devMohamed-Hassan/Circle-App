@@ -35,3 +35,9 @@ export interface Comment {
   post: string;
   createdAt: string;
 }
+
+export type DecodedToken = {
+  user: string;
+  exp?: number;
+  iat?: number;
+};
