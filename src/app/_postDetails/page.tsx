@@ -18,6 +18,8 @@ import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import CommentIcon from "@mui/icons-material/Comment";
 import { Post } from "../interfaces";
 import Image from "next/image";
+import { Box } from "@mui/material";
+import Link from "next/link";
 
 interface ExpandMoreProps extends IconButtonProps {
   expand: boolean;
@@ -119,13 +121,72 @@ export default function PostDetails({ post }: { post: Post }) {
         </IconButton>
       </CardActions>
       <Collapse in={expanded} timeout="auto" unmountOnExit>
-        <CardContent>
-          <Typography sx={{ marginBottom: 2 }}>Method:</Typography>
-          <Typography sx={{ marginBottom: 2 }}>
-            Heat 1/2 cup of the broth in a pot until simmering, add saffron and
-            set aside for 10 minutes.
-          </Typography>
-        </CardContent>
+        {post.comments.length > 0 && (
+          <CardContent
+            sx={{
+              bgcolor: "#f5f5f5",
+              borderRadius: 2,
+              boxShadow: 1,
+              mt: 1,
+              p: 2,
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2 }}>
+              <Avatar sx={{ width: 44, height: 44 }}>
+                {!post.comments[0].commentCreator.photo.includes(
+                  "undefined"
+                ) ? (
+                  <Image
+                    src={post.comments[0].commentCreator.photo}
+                    alt={post.comments[0].commentCreator.name}
+                    width={44}
+                    height={44}
+                    style={{
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                      width: "100%",
+                      height: "100%",
+                    }}
+                  />
+                ) : (
+                  post.comments[0].commentCreator.name.slice(0, 1)
+                )}
+              </Avatar>
+              <Box sx={{ flex: 1 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography variant="subtitle2" fontWeight={600}>
+                    {post.comments[0].commentCreator.name}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {new Date(post.comments[0].createdAt).toLocaleString(
+                      "en-US",
+                      {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      }
+                    )}
+                  </Typography>
+                </Box>
+
+                <Typography
+                  variant="body2"
+                  sx={{ mt: 1, color: "text.primary", whiteSpace: "pre-line" }}
+                >
+                  {post.comments[0].content}
+                </Typography>
+              </Box>
+              <IconButton aria-label="options" size="small">
+                <MoreVertIcon fontSize="small" />
+              </IconButton>
+            </Box>
+          </CardContent>
+        )}
       </Collapse>
     </Card>
   );
