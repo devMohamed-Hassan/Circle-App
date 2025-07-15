@@ -3,3 +3,11 @@ export type DecodedToken = {
   exp?: number;
   iat?: number;
 };
+
+export interface UserProfile {
+  name: string;
+  email: string;
+  gender: string;
+  dateOfBirth: string;
+  photo: string;
+}
