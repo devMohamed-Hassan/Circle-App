@@ -1,44 +1,80 @@
 "use client";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState, StoreDispatch } from "../../store/store";
-import { useEffect, useState } from "react";
-import { jwtDecode } from "jwt-decode";
-import { DecodedToken } from "../../types/index";
-import { getUserPosts } from "../_features/posts/postsSlice";
-import PostCard from "../_components/PostCard";
+import {
+  Box,
+  List,
+  ListItemButton,
+  ListItemText,
+  Typography,
+} from "@mui/material";
+import { useState } from "react";
+import ChangePassword from "../_components/User/ChangePassword";
+import UserInfo from "../_components/User/UserInfo";
+import MyPosts from "../_components/User/MyPosts";
 
-export default function Profile() {
-  const { isLoading, posts } = useSelector(
-    (state: RootState) => state.postsReducer
-  );
-  const dispatch = useDispatch<StoreDispatch>();
+const SECTIONS = ["My Info", "My Posts", "Change Password"];
 
-  const [userId, setUserId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const token = localStorage.getItem("userToken");
-    if (token) {
-      try {
-        const { user } = jwtDecode<DecodedToken>(token);
-        setUserId(user);
-        dispatch(getUserPosts(user));
-      } catch (error) {
-        console.error("Failed to decode token", error);
-      }
-    }
-  }, [dispatch]);
+export default function ProfileLayout() {
+  const [active, setActive] = useState("My Info");
 
   return (
-    <>
-      <h2>Profile</h2>
+    <Box
+      sx={{
+        display: "flex",
+        bgcolor: "#fafafa",
+        p: 2,
+        borderRadius: 2,
+        boxShadow: 3,
+        height: "80vh",
+      }}
+    >
+      <Box
+        sx={{
+          width: 220,
+          p: 2,
+          bgcolor: "#fff",
+          borderRight: "1px solid #ddd",
+          borderRadius: "12px 0 0 12px",
+        }}
+      >
+        <Typography variant="h6" mb={1} fontWeight="bold" color="primary">
+          Profile
+        </Typography>
+        <List>
+          {SECTIONS.map((section) => (
+            <ListItemButton
+              key={section}
+              selected={active === section}
+              onClick={() => setActive(section)}
+              sx={{
+                borderRadius: 1,
+                mb: 0.5,
+                py: 1,
+                "&.Mui-selected": {
+                  bgcolor: "primary.main",
+                  color: "white",
+                  "&:hover": { bgcolor: "primary.dark" },
+                },
+              }}
+            >
+              <ListItemText primary={section} />
+            </ListItemButton>
+          ))}
+        </List>
+      </Box>
 
-      {isLoading ? (
-        <p>Loading your posts...</p>
-      ) : posts.length > 0 ? (
-        posts.map((post) => <PostCard key={post._id} post={post} />)
-      ) : (
-        <p>You have not created any posts yet.</p>
-      )}
-    </>
+      <Box
+        sx={{
+          flex: 1,
+          p: 3,
+          bgcolor: "#fff",
+          borderRadius: "0 12px 12px 0",
+          overflowY: "auto",
+        }}
+      >
+        {active === "My Info" && <UserInfo />}
+        {active === "My Posts" && <MyPosts />}
+        {active === "Change Password" && <ChangePassword />}
+      </Box>
+    </Box>
   );
 }
