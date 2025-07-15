@@ -19,7 +19,7 @@ import ShareIcon from "@mui/icons-material/Share";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import CommentIcon from "@mui/icons-material/Comment";
-import { Post } from "../_features/posts/types";
+import { Post } from "../../_features/posts/types";
 import Image from "next/image";
 import Link from "next/link";
 

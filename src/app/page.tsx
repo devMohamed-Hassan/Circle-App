@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getPosts } from "./_features/posts/postsSlice";
 import { RootState, StoreDispatch } from "../store/store";
-import PostCard from "./_components/PostCard";
+import PostCard from "./_components/common/PostCard";
 
 export default function Home() {
   const router = useRouter();

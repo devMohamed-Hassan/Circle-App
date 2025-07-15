@@ -4,7 +4,7 @@ import { Roboto, Inter } from "next/font/google";
 import "./globals.css";
 import { ReactNode } from "react";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
-import Navbar from "./_components/Navbar";
+import Navbar from "./_components/common/Navbar";
 import { Provider } from "react-redux";
 import { store } from "../store/store";
 import { Container } from "@mui/material";
