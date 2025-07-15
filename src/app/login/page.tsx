@@ -1,10 +1,22 @@
 "use client";
 
-import { Button, CircularProgress, Paper, TextField } from "@mui/material";
+import {
+  Button,
+  CircularProgress,
+  Paper,
+  TextField,
+  Typography,
+  Box,
+} from "@mui/material";
 import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../_redux/store";
-import { setDone, setError, setLoading, setToken } from "../_redux/authSlice";
+import { RootState } from "../../store/store";
+import {
+  setDone,
+  setError,
+  setLoading,
+  setToken,
+} from "../_features/auth/authSlice";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
@@ -40,7 +52,7 @@ export default function Login() {
       toast.success("Login success");
       setTimeout(() => {
         router.push("/");
-      }, 2000);
+      }, 1500);
     } catch (err: any) {
       dispatch(setError(err.message || "Unknown error"));
     } finally {
@@ -57,36 +69,63 @@ export default function Login() {
   });
 
   return (
-    <>
-      <Paper elevation={5} sx={{ p: 2, m: 3 }}>
-        <h2 className="bg-gray-800">Login</h2>
+    <Box
+      minHeight="100vh"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+    >
+      <Paper
+        elevation={4}
+        sx={{
+          p: 4,
+          width: "100%",
+          maxWidth: "400px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 3,
+        }}
+      >
+        <Typography
+          variant="h5"
+          fontWeight="bold"
+          textAlign="center"
+          color="primary"
+        >
+          Login to your account
+        </Typography>
+
         <form
           onSubmit={handleSubmit}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "1.5rem",
-            padding: "2rem",
-          }}
+          style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
         >
           <TextField
+            fullWidth
             onChange={handleChange}
             value={values.email}
             id="email"
             label="Email"
             type="email"
-            variant="standard"
+            variant="outlined"
           />
           <TextField
+            fullWidth
             onChange={handleChange}
             value={values.password}
             id="password"
             type="password"
             label="Password"
-            variant="standard"
+            variant="outlined"
           />
 
-          <Button disabled={isLoading} variant="contained" type="submit">
+          <Button
+            disabled={isLoading}
+            variant="contained"
+            color="primary"
+            type="submit"
+            fullWidth
+            sx={{ py: 1 }}
+          >
             {!isLoading ? (
               "Login"
             ) : (
@@ -95,6 +134,6 @@ export default function Login() {
           </Button>
         </form>
       </Paper>
-    </>
+    </Box>
   );
 }

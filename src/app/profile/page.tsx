@@ -1,11 +1,11 @@
 "use client";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState, StoreDispatch } from "../_redux/store";
+import { RootState, StoreDispatch } from "../../store/store";
 import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
-import { DecodedToken } from "../interfaces";
-import { getUserPosts } from "../_redux/postsSlice";
-import PostDetails from "../_postDetails/page";
+import { DecodedToken } from "../../types/index";
+import { getUserPosts } from "../_features/posts/postsSlice";
+import PostCard from "../_components/PostCard";
 
 export default function Profile() {
   const { isLoading, posts } = useSelector(
@@ -35,7 +35,7 @@ export default function Profile() {
       {isLoading ? (
         <p>Loading your posts...</p>
       ) : posts.length > 0 ? (
-        posts.map((post) => <PostDetails key={post._id} post={post} />)
+        posts.map((post) => <PostCard key={post._id} post={post} />)
       ) : (
         <p>You have not created any posts yet.</p>
       )}

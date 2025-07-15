@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { Post } from "../interfaces";
+import { Post } from "./types";
 
 const initialState = {
   isLoading: false as Boolean,

@@ -1,13 +1,12 @@
 :root {
-  --background: #ffffff;
+  --background: #f8fafc;
   --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --primary: #111111;
+  --primary-light: #333333;
+  --primary-dark: #000000;
+  --border-radius: 12px;
+  --font-heading: "Inter", Arial, Helvetica, sans-serif;
+  --font-body: "Roboto", Arial, Helvetica, sans-serif;
 }
 
 html,
@@ -19,9 +18,21 @@ body {
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--primary-dark);
+  margin-bottom: 0.5em;
 }
 
 * {
@@ -31,12 +42,12 @@ body {
 }
 
 a {
-  color: inherit;
+  color: var(--primary);
   text-decoration: none;
+  transition: color 0.2s;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+a:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
 }

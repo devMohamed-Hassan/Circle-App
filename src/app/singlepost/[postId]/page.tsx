@@ -1,7 +1,7 @@
 "use client";
-import PostDetails from "@/app/_postDetails/page";
+import PostCard from "@/app/_components/PostCard";
 import { getPost } from "@/app/_redux/postsSlice";
-import { RootState, StoreDispatch } from "@/app/_redux/store";
+import { RootState, StoreDispatch } from "@/store/store";
 import Loading from "@/app/loading";
 import { useParams } from "next/navigation";
 import { useEffect } from "react";
@@ -19,5 +19,5 @@ export default function SinglePost() {
   if (isLoading) {
     return <Loading />;
   }
-  return <>{post && <PostDetails post={post} />}</>;
+  return <>{post && <PostCard post={post} />}</>;
 }

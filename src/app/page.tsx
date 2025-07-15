@@ -2,9 +2,9 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getPosts } from "./_redux/postsSlice";
-import { RootState, StoreDispatch } from "./_redux/store";
-import PostDetails from "./_postDetails/page";
+import { getPosts } from "./_features/posts/postsSlice";
+import { RootState, StoreDispatch } from "../store/store";
+import PostCard from "./_components/PostCard";
 
 export default function Home() {
   const router = useRouter();
@@ -28,10 +28,10 @@ export default function Home() {
   if (isLoading) return <p>Loading...</p>;
 
   return (
-    <>
+    <div className="main">
       {posts.map((post) => (
-        <PostDetails key={post.id} post={post} />
+        <PostCard key={post.id} post={post} />
       ))}
-    </>
+    </div>
   );
 }
