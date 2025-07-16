@@ -30,7 +30,11 @@ export default function Home() {
   return (
     <div className="main">
       {posts.map((post) => (
-        <PostCard key={post.id} post={post} />
+        <PostCard
+          key={post._id}
+          post={post}
+          onPostDeleted={() => dispatch(getPosts())}
+        />
       ))}
     </div>
   );

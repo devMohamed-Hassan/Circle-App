@@ -23,6 +23,9 @@ import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import CommentIcon from "@mui/icons-material/Comment";
 import { Post } from "../../_features/posts/types";
 import Image from "next/image";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { useRouter } from "next/navigation";
 
 interface ExpandMoreProps {
   expand: boolean;
@@ -39,17 +42,29 @@ const ExpandMore = styled((props: ExpandMoreProps & any) => {
   }),
 }));
 
-export default function PostCard({ post }: { post: Post }) {
+export default function PostCard({
+  post,
+  onPostDeleted,
+}: {
+  post: Post;
+  onPostDeleted?: (userID?: string) => void;
+}) {
+  const { user } = useSelector((state: RootState) => state.authReducer);
   const [expanded, setExpanded] = React.useState(false);
   const [showAllComments, setShowAllComments] = React.useState(false);
   const [newComment, setNewComment] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [localComments, setLocalComments] = React.useState(post.comments);
-
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [selectedCommentId, setSelectedCommentId] = React.useState<
     string | null
   >(null);
+  const [postAnchorEl, setPostAnchorEl] = React.useState<null | HTMLElement>(
+    null
+  );
+  const router = useRouter();
+  // console.log("user: ", user);
+  // console.log("user of post: ", post.user);
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
@@ -69,17 +84,20 @@ export default function PostCard({ post }: { post: Post }) {
     setSelectedCommentId(null);
   };
 
+  const handlePostMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setPostAnchorEl(event.currentTarget);
+  };
+
+  const handlePostMenuClose = () => {
+    setPostAnchorEl(null);
+  };
+
   const handleAddComment = async () => {
     if (newComment.trim() === "") return;
-
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem("userToken");
-      if (!token) {
-        alert("You must be logged in to comment.");
-        return;
-      }
-
+      if (!token) return alert("You must be logged in to comment.");
       const res = await fetch("https://linked-posts.routemisr.com/comments", {
         method: "POST",
         headers: {
@@ -91,14 +109,11 @@ export default function PostCard({ post }: { post: Post }) {
           post: post._id,
         }),
       });
-
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to post comment");
-
       if (data.comments?.length) {
         setLocalComments((prev) => [data.comments[0], ...prev]);
       }
-
       setNewComment("");
     } catch (error) {
       console.error("Error posting comment:", error);
@@ -110,14 +125,9 @@ export default function PostCard({ post }: { post: Post }) {
 
   const handleDeleteComment = async (commentId: string) => {
     const token = localStorage.getItem("userToken");
-    if (!token) {
-      alert("You must be logged in to delete comments.");
-      return;
-    }
-
+    if (!token) return alert("You must be logged in to delete comments.");
     const confirmed = confirm("Are you sure you want to delete this comment?");
     if (!confirmed) return;
-
     try {
       const res = await fetch(
         `https://linked-posts.routemisr.com/comments/${commentId}`,
@@ -128,16 +138,41 @@ export default function PostCard({ post }: { post: Post }) {
           },
         }
       );
-
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to delete comment");
-
       setLocalComments((prev) => prev.filter((c) => c._id !== commentId));
     } catch (err) {
       console.error("Error deleting comment:", err);
       alert("Failed to delete comment.");
     } finally {
       handleMenuClose();
+    }
+  };
+
+  const handleDeletePost = async () => {
+    const token = localStorage.getItem("userToken");
+    if (!token) return alert("You must be logged in to delete this post.");
+    const confirmed = confirm("Are you sure you want to delete this post?");
+    if (!confirmed) return;
+    try {
+      const res = await fetch(
+        `https://linked-posts.routemisr.com/posts/${post._id}`,
+        {
+          method: "DELETE",
+          headers: {
+            token: `${token}`,
+          },
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to delete post");
+      alert("Post deleted successfully.");
+      onPostDeleted?.();
+    } catch (err) {
+      console.error("Error deleting post:", err);
+      alert("Failed to delete post.");
+    } finally {
+      handlePostMenuClose();
     }
   };
 
@@ -156,9 +191,20 @@ export default function PostCard({ post }: { post: Post }) {
           </Avatar>
         }
         action={
-          <IconButton aria-label="settings">
-            <MoreVertIcon />
-          </IconButton>
+          <>
+            {user?._id === post.user._id && (
+              <IconButton aria-label="settings" onClick={handlePostMenuOpen}>
+                <MoreVertIcon />
+              </IconButton>
+            )}
+            <Menu
+              anchorEl={postAnchorEl}
+              open={Boolean(postAnchorEl)}
+              onClose={handlePostMenuClose}
+            >
+              <MenuItem onClick={handleDeletePost}>Delete Post</MenuItem>
+            </Menu>
+          </>
         }
         title={post.user.name}
         subheader={new Date(post.createdAt).toLocaleString("en-US", {
@@ -166,13 +212,11 @@ export default function PostCard({ post }: { post: Post }) {
           timeStyle: "short",
         })}
       />
-
       <CardContent>
         <Typography variant="body2" sx={{ color: "text.secondary" }}>
           {post.body}
         </Typography>
       </CardContent>
-
       {post.image && (
         <Box sx={{ mt: 1 }}>
           <Image
@@ -184,19 +228,12 @@ export default function PostCard({ post }: { post: Post }) {
           />
         </Box>
       )}
-
       <CardActions
-        sx={{
-          px: 2,
-          pt: 1,
-          display: "flex",
-          justifyContent: "space-between",
-        }}
+        sx={{ px: 2, pt: 1, display: "flex", justifyContent: "space-between" }}
       >
         <IconButton aria-label="like" sx={{ color: "#777" }}>
           <ThumbUpIcon />
         </IconButton>
-
         <ExpandMore
           expand={expanded}
           onClick={handleExpandClick}
@@ -205,14 +242,11 @@ export default function PostCard({ post }: { post: Post }) {
         >
           <CommentIcon />
         </ExpandMore>
-
         <IconButton aria-label="share" sx={{ color: "#777" }}>
           <ShareIcon />
         </IconButton>
       </CardActions>
-
       <Collapse in={expanded} timeout="auto" unmountOnExit>
-
         <Box sx={{ display: "flex", gap: 2, mx: 2, my: 2 }}>
           <Avatar sx={{ width: 40, height: 40 }}>U</Avatar>
           <Box sx={{ flex: 1 }}>
@@ -236,7 +270,6 @@ export default function PostCard({ post }: { post: Post }) {
             </Box>
           </Box>
         </Box>
-
         {localComments.length > 0 && (
           <CardContent
             sx={{
@@ -252,7 +285,6 @@ export default function PostCard({ post }: { post: Post }) {
               .map((comment, index) => {
                 const creator = comment.commentCreator;
                 if (!creator) return null;
-
                 return (
                   <Box
                     key={comment._id || index}
@@ -281,7 +313,6 @@ export default function PostCard({ post }: { post: Post }) {
                         creator.name?.[0] || "?"
                       )}
                     </Avatar>
-
                     <Box sx={{ flex: 1 }}>
                       <Box
                         sx={{
@@ -300,7 +331,6 @@ export default function PostCard({ post }: { post: Post }) {
                           })}
                         </Typography>
                       </Box>
-
                       <Typography
                         variant="body2"
                         sx={{
@@ -312,7 +342,6 @@ export default function PostCard({ post }: { post: Post }) {
                         {comment.content}
                       </Typography>
                     </Box>
-
                     <IconButton
                       aria-label="options"
                       size="small"
@@ -323,7 +352,6 @@ export default function PostCard({ post }: { post: Post }) {
                   </Box>
                 );
               })}
-
             <Menu
               anchorEl={anchorEl}
               open={Boolean(anchorEl)}
@@ -340,7 +368,6 @@ export default function PostCard({ post }: { post: Post }) {
                 Delete
               </MenuItem>
             </Menu>
-
             {localComments.length > 2 && (
               <Button
                 onClick={() => setShowAllComments((prev) => !prev)}

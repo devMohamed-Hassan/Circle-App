@@ -46,7 +46,7 @@ export default function CreatePost() {
 
       toast.success(data.message);
       setTimeout(() => {
-        router.push("/profile");
+        router.push("/");
       }, 1500);
     } catch (error: any) {
       toast.error(error.message || "Failed to create post. Please try again.");
@@ -75,35 +75,6 @@ export default function CreatePost() {
           overflow: "hidden",
         }}
       >
-        {loading && (
-          <Box
-            sx={{
-              position: "absolute",
-              inset: 0,
-              zIndex: 10,
-              bgcolor: "rgba(255,255,255,0.7)",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 2,
-            }}
-          >
-            <Skeleton variant="text" width={200} height={40} />
-            <Skeleton
-              variant="rectangular"
-              width={400}
-              height={120}
-              sx={{ borderRadius: 2 }}
-            />
-            <Skeleton
-              variant="rectangular"
-              width={120}
-              height={40}
-              sx={{ borderRadius: 2 }}
-            />
-          </Box>
-        )}
         <Typography
           variant="h5"
           fontWeight={600}

@@ -10,7 +10,7 @@ const initialState = {
 
 export const getPosts = createAsyncThunk("posts/getPosts", async () => {
   const response = await fetch(
-    `https://linked-posts.routemisr.com/posts?limit=50`,
+    `https://linked-posts.routemisr.com/posts?limit=50&sort=-createdAt`,
     {
       method: "GET",
       headers: {
@@ -56,7 +56,7 @@ export const getUserPosts = createAsyncThunk(
     );
     const data = await response.json();
     console.log(data.posts);
-    return data.posts;
+    return [...data.posts].reverse();
   }
 );
 
