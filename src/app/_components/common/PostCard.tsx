@@ -6,7 +6,6 @@ import {
   Box,
   Card,
   CardHeader,
-  CardMedia,
   CardContent,
   CardActions,
   Collapse,
@@ -14,6 +13,9 @@ import {
   IconButton,
   Typography,
   Button,
+  TextField,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import ShareIcon from "@mui/icons-material/Share";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -21,7 +23,6 @@ import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import CommentIcon from "@mui/icons-material/Comment";
 import { Post } from "../../_features/posts/types";
 import Image from "next/image";
-import Link from "next/link";
 
 interface ExpandMoreProps {
   expand: boolean;
@@ -41,11 +42,102 @@ const ExpandMore = styled((props: ExpandMoreProps & any) => {
 export default function PostCard({ post }: { post: Post }) {
   const [expanded, setExpanded] = React.useState(false);
   const [showAllComments, setShowAllComments] = React.useState(false);
+  const [newComment, setNewComment] = React.useState("");
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [localComments, setLocalComments] = React.useState(post.comments);
+
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [selectedCommentId, setSelectedCommentId] = React.useState<
+    string | null
+  >(null);
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
-    if (!expanded) {
-      setShowAllComments(false);
+    if (!expanded) setShowAllComments(false);
+  };
+
+  const handleMenuOpen = (
+    event: React.MouseEvent<HTMLElement>,
+    commentId: string
+  ) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedCommentId(commentId);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedCommentId(null);
+  };
+
+  const handleAddComment = async () => {
+    if (newComment.trim() === "") return;
+
+    try {
+      setIsSubmitting(true);
+      const token = localStorage.getItem("userToken");
+      if (!token) {
+        alert("You must be logged in to comment.");
+        return;
+      }
+
+      const res = await fetch("https://linked-posts.routemisr.com/comments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          token: ` ${token}`,
+        },
+        body: JSON.stringify({
+          content: newComment,
+          post: post._id,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to post comment");
+
+      if (data.comments?.length) {
+        setLocalComments((prev) => [data.comments[0], ...prev]);
+      }
+
+      setNewComment("");
+    } catch (error) {
+      console.error("Error posting comment:", error);
+      alert("Failed to post comment.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    const token = localStorage.getItem("userToken");
+    if (!token) {
+      alert("You must be logged in to delete comments.");
+      return;
+    }
+
+    const confirmed = confirm("Are you sure you want to delete this comment?");
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(
+        `https://linked-posts.routemisr.com/comments/${commentId}`,
+        {
+          method: "DELETE",
+          headers: {
+            token: `${token}`,
+          },
+        }
+      );
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to delete comment");
+
+      setLocalComments((prev) => prev.filter((c) => c._id !== commentId));
+    } catch (err) {
+      console.error("Error deleting comment:", err);
+      alert("Failed to delete comment.");
+    } finally {
+      handleMenuClose();
     }
   };
 
@@ -120,7 +212,32 @@ export default function PostCard({ post }: { post: Post }) {
       </CardActions>
 
       <Collapse in={expanded} timeout="auto" unmountOnExit>
-        {post.comments.length > 0 && (
+
+        <Box sx={{ display: "flex", gap: 2, mx: 2, my: 2 }}>
+          <Avatar sx={{ width: 40, height: 40 }}>U</Avatar>
+          <Box sx={{ flex: 1 }}>
+            <TextField
+              fullWidth
+              size="small"
+              placeholder="Write a comment..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              multiline
+            />
+            <Box sx={{ textAlign: "right", mt: 1 }}>
+              <Button
+                size="small"
+                variant="contained"
+                onClick={handleAddComment}
+                disabled={isSubmitting || newComment.trim() === ""}
+              >
+                {isSubmitting ? "Commenting ..." : "Comment"}
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+
+        {localComments.length > 0 && (
           <CardContent
             sx={{
               bgcolor: "#f9f9f9",
@@ -130,75 +247,101 @@ export default function PostCard({ post }: { post: Post }) {
               p: 2,
             }}
           >
-            {post.comments
-              .slice(0, showAllComments ? post.comments.length : 2)
-              .map((comment, index) => (
-                <Box
-                  key={comment._id || index}
-                  sx={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: 2,
-                    mb: 2,
-                  }}
-                >
-                  <Avatar sx={{ width: 44, height: 44 }}>
-                    {!comment.commentCreator.photo.includes("undefined") ? (
-                      <Image
-                        src={comment.commentCreator.photo}
-                        alt={comment.commentCreator.name}
-                        width={44}
-                        height={44}
-                        style={{
-                          borderRadius: "50%",
-                          objectFit: "cover",
-                          width: "100%",
-                          height: "100%",
-                        }}
-                      />
-                    ) : (
-                      comment.commentCreator.name.slice(0, 1)
-                    )}
-                  </Avatar>
+            {localComments
+              .slice(0, showAllComments ? localComments.length : 2)
+              .map((comment, index) => {
+                const creator = comment.commentCreator;
+                if (!creator) return null;
 
-                  <Box sx={{ flex: 1 }}>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Typography variant="subtitle2" fontWeight={600}>
-                        {comment.commentCreator.name}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {new Date(comment.createdAt).toLocaleString("en-US", {
-                          dateStyle: "medium",
-                          timeStyle: "short",
-                        })}
+                return (
+                  <Box
+                    key={comment._id || index}
+                    sx={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 2,
+                      mb: 2,
+                    }}
+                  >
+                    <Avatar sx={{ width: 44, height: 44 }}>
+                      {creator.photo && !creator.photo.includes("undefined") ? (
+                        <Image
+                          src={creator.photo}
+                          alt={creator.name}
+                          width={44}
+                          height={44}
+                          style={{
+                            borderRadius: "50%",
+                            objectFit: "cover",
+                            width: "100%",
+                            height: "100%",
+                          }}
+                        />
+                      ) : (
+                        creator.name?.[0] || "?"
+                      )}
+                    </Avatar>
+
+                    <Box sx={{ flex: 1 }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Typography variant="subtitle2" fontWeight={600}>
+                          {creator.name}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {new Date(comment.createdAt).toLocaleString("en-US", {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          })}
+                        </Typography>
+                      </Box>
+
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          mt: 1,
+                          color: "text.primary",
+                          whiteSpace: "pre-line",
+                        }}
+                      >
+                        {comment.content}
                       </Typography>
                     </Box>
 
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        mt: 1,
-                        color: "text.primary",
-                        whiteSpace: "pre-line",
-                      }}
+                    <IconButton
+                      aria-label="options"
+                      size="small"
+                      onClick={(e) => handleMenuOpen(e, comment._id)}
                     >
-                      {comment.content}
-                    </Typography>
+                      <MoreVertIcon fontSize="small" />
+                    </IconButton>
                   </Box>
+                );
+              })}
 
-                  <IconButton aria-label="options" size="small">
-                    <MoreVertIcon fontSize="small" />
-                  </IconButton>
-                </Box>
-              ))}
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
+              disableAutoFocusItem
+            >
+              <MenuItem
+                onClick={() => {
+                  if (selectedCommentId) {
+                    handleDeleteComment(selectedCommentId);
+                  }
+                }}
+              >
+                Delete
+              </MenuItem>
+            </Menu>
 
-            {post.comments.length > 2 && (
+            {localComments.length > 2 && (
               <Button
                 onClick={() => setShowAllComments((prev) => !prev)}
                 size="small"
@@ -211,7 +354,7 @@ export default function PostCard({ post }: { post: Post }) {
               >
                 {showAllComments
                   ? "Show less"
-                  : `Show more (${post.comments.length - 2} more)`}
+                  : `Show more (${localComments.length - 2} more)`}
               </Button>
             )}
           </CardContent>
