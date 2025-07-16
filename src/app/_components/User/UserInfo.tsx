@@ -1,4 +1,5 @@
 "use client";
+
 import {
   Box,
   Typography,
@@ -11,13 +12,17 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { UserProfile } from "../../../types/index";
 import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { setUser } from "@/app/_features/auth/authSlice";
 
 export default function UserInfo() {
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const [user, setUserLocal] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const token = localStorage.getItem("userToken");
@@ -37,7 +42,9 @@ export default function UserInfo() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Failed to fetch profile");
 
-        setUser(data.user);
+        setUserLocal(data.user);
+        dispatch(setUser(data.user));
+        localStorage.setItem("userData", JSON.stringify(data.user));
       } catch (error) {
         console.error("Profile fetch error:", error);
       } finally {
@@ -46,7 +53,7 @@ export default function UserInfo() {
     };
 
     fetchProfile();
-  }, []);
+  }, [dispatch]);
 
   const handleUploadClick = () => {
     inputRef.current?.click();
@@ -97,8 +104,6 @@ export default function UserInfo() {
       }
 
       const data = await res.json();
-      console.log("Upload response:", data);
-
       if (!res.ok) throw new Error(data.message || "Upload failed");
 
       const newPhoto = data?.user?.photo || data?.photo || preview;
@@ -110,9 +115,27 @@ export default function UserInfo() {
         toast.success("Profile photo updated");
       }
 
-      setUser((prev) =>
+      setUserLocal((prev) =>
         prev && newPhoto ? { ...prev, photo: newPhoto } : prev
       );
+
+      if (newPhoto && user) {
+        const updatedUser = { ...user, photo: newPhoto };
+
+        setUserLocal(updatedUser);
+        dispatch(setUser(updatedUser));
+        localStorage.setItem("userData", JSON.stringify(updatedUser));
+      } else {
+        console.log("Upload success but no image returned from server");
+      }
+
+      const storedUser = localStorage.getItem("userData");
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        parsedUser.photo = newPhoto;
+        localStorage.setItem("userData", JSON.stringify(parsedUser));
+      }
+
       setPreview(null);
     } catch (err: any) {
       toast.error(err.message || "Upload failed");

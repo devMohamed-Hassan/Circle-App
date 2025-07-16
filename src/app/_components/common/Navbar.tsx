@@ -18,7 +18,7 @@ import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import { RootState, store } from "@/store/store";
-import { removeToken, setToken } from "@/app/_features/auth/authSlice";
+import { removeToken, setToken, setUser } from "@/app/_features/auth/authSlice";
 
 const Navbar = () => {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
@@ -30,15 +30,28 @@ const Navbar = () => {
 
   const dispatch = useDispatch();
   const router = useRouter();
-  const { token } = useSelector((state: RootState) => state.authReducer);
+  const { token, user } = useSelector((state: RootState) => state.authReducer);
   const isAuthenticated = Boolean(token);
+  console.log(user);
 
   React.useEffect(() => {
     const storedToken = localStorage.getItem("userToken");
+    const storedUser = localStorage.getItem("userData");
+
     if (storedToken && !token) {
       dispatch(setToken(storedToken));
     }
-  }, [dispatch, token]);
+
+    if (storedUser && !user) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        dispatch(setUser(parsedUser));
+      } catch (err) {
+        console.error("Invalid userData", err);
+        localStorage.removeItem("userData");
+      }
+    }
+  }, [dispatch, token, user]);
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
@@ -154,7 +167,10 @@ const Navbar = () => {
               <>
                 <Tooltip title="Account settings">
                   <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                    <Avatar alt="User" src="/avatar.png" />
+                    <Avatar
+                      alt={user?.name || "User"}
+                      src={user?.photo || "/default-avatar.png"}
+                    />
                   </IconButton>
                 </Tooltip>
                 <Menu
