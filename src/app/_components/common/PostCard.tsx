@@ -47,7 +47,7 @@ export default function PostCard({
   onPostDeleted,
 }: {
   post: Post;
-  onPostDeleted?: (userID?: string) => void;
+  onPostDeleted?: () => void;
 }) {
   const { user } = useSelector((state: RootState) => state.authReducer);
   const [expanded, setExpanded] = React.useState(false);
@@ -62,9 +62,11 @@ export default function PostCard({
   const [postAnchorEl, setPostAnchorEl] = React.useState<null | HTMLElement>(
     null
   );
-  const router = useRouter();
-  // console.log("user: ", user);
-  // console.log("user of post: ", post.user);
+  const [editingCommentId, setEditingCommentId] = React.useState<string | null>(
+    null
+  );
+  const [editedContent, setEditedContent] = React.useState("");
+
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
@@ -97,7 +99,7 @@ export default function PostCard({
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem("userToken");
-      if (!token) return alert("You must be logged in to comment.");
+      if (!token) return;
       const res = await fetch("https://linked-posts.routemisr.com/comments", {
         method: "POST",
         headers: {
@@ -110,14 +112,12 @@ export default function PostCard({
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to post comment");
+      if (!res.ok) throw new Error(data.message);
       if (data.comments?.length) {
         setLocalComments((prev) => [data.comments[0], ...prev]);
       }
       setNewComment("");
-    } catch (error) {
-      console.error("Error posting comment:", error);
-      alert("Failed to post comment.");
+    } catch {
     } finally {
       setIsSubmitting(false);
     }
@@ -125,7 +125,7 @@ export default function PostCard({
 
   const handleDeleteComment = async (commentId: string) => {
     const token = localStorage.getItem("userToken");
-    if (!token) return alert("You must be logged in to delete comments.");
+    if (!token) return;
     const confirmed = confirm("Are you sure you want to delete this comment?");
     if (!confirmed) return;
     try {
@@ -133,25 +133,50 @@ export default function PostCard({
         `https://linked-posts.routemisr.com/comments/${commentId}`,
         {
           method: "DELETE",
-          headers: {
-            token: `${token}`,
-          },
+          headers: { token },
         }
       );
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to delete comment");
+      if (!res.ok) throw new Error(data.message);
       setLocalComments((prev) => prev.filter((c) => c._id !== commentId));
-    } catch (err) {
-      console.error("Error deleting comment:", err);
-      alert("Failed to delete comment.");
+    } catch {
     } finally {
       handleMenuClose();
     }
   };
 
+  const handleEditComment = async () => {
+    const token = localStorage.getItem("userToken");
+    if (!token || !editingCommentId || editedContent.trim() === "") return;
+    try {
+      const res = await fetch(
+        `https://linked-posts.routemisr.com/comments/${editingCommentId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            token,
+          },
+          body: JSON.stringify({ content: editedContent }),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      setLocalComments((prev) =>
+        prev.map((comment) =>
+          comment._id === editingCommentId
+            ? { ...comment, content: editedContent }
+            : comment
+        )
+      );
+      setEditingCommentId(null);
+      setEditedContent("");
+    } catch {}
+  };
+
   const handleDeletePost = async () => {
     const token = localStorage.getItem("userToken");
-    if (!token) return alert("You must be logged in to delete this post.");
+    if (!token) return;
     const confirmed = confirm("Are you sure you want to delete this post?");
     if (!confirmed) return;
     try {
@@ -159,18 +184,13 @@ export default function PostCard({
         `https://linked-posts.routemisr.com/posts/${post._id}`,
         {
           method: "DELETE",
-          headers: {
-            token: `${token}`,
-          },
+          headers: { token },
         }
       );
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to delete post");
-      alert("Post deleted successfully.");
+      if (!res.ok) throw new Error(data.message);
       onPostDeleted?.();
-    } catch (err) {
-      console.error("Error deleting post:", err);
-      alert("Failed to delete post.");
+    } catch {
     } finally {
       handlePostMenuClose();
     }
@@ -193,7 +213,7 @@ export default function PostCard({
         action={
           <>
             {user?._id === post.user._id && (
-              <IconButton aria-label="settings" onClick={handlePostMenuOpen}>
+              <IconButton onClick={handlePostMenuOpen}>
                 <MoreVertIcon />
               </IconButton>
             )}
@@ -231,18 +251,17 @@ export default function PostCard({
       <CardActions
         sx={{ px: 2, pt: 1, display: "flex", justifyContent: "space-between" }}
       >
-        <IconButton aria-label="like" sx={{ color: "#777" }}>
+        <IconButton sx={{ color: "#777" }}>
           <ThumbUpIcon />
         </IconButton>
         <ExpandMore
           expand={expanded}
           onClick={handleExpandClick}
           aria-expanded={expanded}
-          aria-label="show comments"
         >
           <CommentIcon />
         </ExpandMore>
-        <IconButton aria-label="share" sx={{ color: "#777" }}>
+        <IconButton sx={{ color: "#777" }}>
           <ShareIcon />
         </IconButton>
       </CardActions>
@@ -339,16 +358,49 @@ export default function PostCard({
                           whiteSpace: "pre-line",
                         }}
                       >
-                        {comment.content}
+                        {editingCommentId === comment._id ? (
+                          <>
+                            <TextField
+                              fullWidth
+                              multiline
+                              size="small"
+                              value={editedContent}
+                              onChange={(e) => setEditedContent(e.target.value)}
+                            />
+                            <Box sx={{ mt: 1, textAlign: "right" }}>
+                              <Button
+                                variant="contained"
+                                size="small"
+                                onClick={handleEditComment}
+                                disabled={editedContent.trim() === ""}
+                              >
+                                Save
+                              </Button>
+                              <Button
+                                size="small"
+                                sx={{ ml: 1 }}
+                                onClick={() => {
+                                  setEditingCommentId(null);
+                                  setEditedContent("");
+                                }}
+                              >
+                                Cancel
+                              </Button>
+                            </Box>
+                          </>
+                        ) : (
+                          comment.content
+                        )}
                       </Typography>
                     </Box>
-                    <IconButton
-                      aria-label="options"
-                      size="small"
-                      onClick={(e) => handleMenuOpen(e, comment._id)}
-                    >
-                      <MoreVertIcon fontSize="small" />
-                    </IconButton>
+                    {user?._id === creator._id && (
+                      <IconButton
+                        size="small"
+                        onClick={(e) => handleMenuOpen(e, comment._id)}
+                      >
+                        <MoreVertIcon fontSize="small" />
+                      </IconButton>
+                    )}
                   </Box>
                 );
               })}
@@ -361,8 +413,22 @@ export default function PostCard({
               <MenuItem
                 onClick={() => {
                   if (selectedCommentId) {
-                    handleDeleteComment(selectedCommentId);
+                    const c = localComments.find(
+                      (c) => c._id === selectedCommentId
+                    );
+                    if (c) {
+                      setEditedContent(c.content);
+                      setEditingCommentId(selectedCommentId);
+                    }
+                    handleMenuClose();
                   }
+                }}
+              >
+                Edit
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  if (selectedCommentId) handleDeleteComment(selectedCommentId);
                 }}
               >
                 Delete
