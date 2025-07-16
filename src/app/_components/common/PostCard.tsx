@@ -16,6 +16,7 @@ import {
   TextField,
   Menu,
   MenuItem,
+  CircularProgress,
 } from "@mui/material";
 import ShareIcon from "@mui/icons-material/Share";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -25,7 +26,6 @@ import { Post } from "../../_features/posts/types";
 import Image from "next/image";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { useRouter } from "next/navigation";
 
 interface ExpandMoreProps {
   expand: boolean;
@@ -66,7 +66,14 @@ export default function PostCard({
     null
   );
   const [editedContent, setEditedContent] = React.useState("");
-
+  const [isEditingPost, setIsEditingPost] = React.useState(false);
+  const [editedPostBody, setEditedPostBody] = React.useState<string>(
+    post.body ?? ""
+  );
+  const [editedPostImage, setEditedPostImage] = React.useState<File | null>(
+    null
+  );
+  const [updatingPost, setUpdatingPost] = React.useState(false);
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
@@ -74,10 +81,10 @@ export default function PostCard({
   };
 
   const handleMenuOpen = (
-    event: React.MouseEvent<HTMLElement>,
+    e: React.MouseEvent<HTMLElement>,
     commentId: string
   ) => {
-    setAnchorEl(event.currentTarget);
+    setAnchorEl(e.currentTarget);
     setSelectedCommentId(commentId);
   };
 
@@ -86,8 +93,8 @@ export default function PostCard({
     setSelectedCommentId(null);
   };
 
-  const handlePostMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setPostAnchorEl(event.currentTarget);
+  const handlePostMenuOpen = (e: React.MouseEvent<HTMLElement>) => {
+    setPostAnchorEl(e.currentTarget);
   };
 
   const handlePostMenuClose = () => {
@@ -102,22 +109,14 @@ export default function PostCard({
       if (!token) return;
       const res = await fetch("https://linked-posts.routemisr.com/comments", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          token: ` ${token}`,
-        },
-        body: JSON.stringify({
-          content: newComment,
-          post: post._id,
-        }),
+        headers: { "Content-Type": "application/json", token: ` ${token}` },
+        body: JSON.stringify({ content: newComment, post: post._id }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
-      if (data.comments?.length) {
+      if (data.comments?.length)
         setLocalComments((prev) => [data.comments[0], ...prev]);
-      }
       setNewComment("");
-    } catch {
     } finally {
       setIsSubmitting(false);
     }
@@ -139,7 +138,6 @@ export default function PostCard({
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       setLocalComments((prev) => prev.filter((c) => c._id !== commentId));
-    } catch {
     } finally {
       handleMenuClose();
     }
@@ -153,25 +151,47 @@ export default function PostCard({
         `https://linked-posts.routemisr.com/comments/${editingCommentId}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            token,
-          },
+          headers: { "Content-Type": "application/json", token },
           body: JSON.stringify({ content: editedContent }),
         }
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       setLocalComments((prev) =>
-        prev.map((comment) =>
-          comment._id === editingCommentId
-            ? { ...comment, content: editedContent }
-            : comment
+        prev.map((c) =>
+          c._id === editingCommentId ? { ...c, content: editedContent } : c
         )
       );
       setEditingCommentId(null);
       setEditedContent("");
     } catch {}
+  };
+
+  const handleEditPost = async () => {
+    const token = localStorage.getItem("userToken");
+    if (!token || editedPostBody.trim() === "") return;
+    try {
+      setUpdatingPost(true);
+      const formData = new FormData();
+      formData.append("body", editedPostBody);
+      if (editedPostImage) formData.append("image", editedPostImage);
+      const res = await fetch(
+        `https://linked-posts.routemisr.com/posts/${post._id}`,
+        {
+          method: "PUT",
+          headers: { token },
+          body: formData,
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      post.body = data.post.body;
+      post.image = data.post.image;
+      setIsEditingPost(false);
+      setEditedPostImage(null);
+    } finally {
+      setUpdatingPost(false);
+    }
   };
 
   const handleDeletePost = async () => {
@@ -190,7 +210,6 @@ export default function PostCard({
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       onPostDeleted?.();
-    } catch {
     } finally {
       handlePostMenuClose();
     }
@@ -222,6 +241,15 @@ export default function PostCard({
               open={Boolean(postAnchorEl)}
               onClose={handlePostMenuClose}
             >
+              <MenuItem
+                onClick={() => {
+                  setIsEditingPost(true);
+                  setEditedPostBody(post.body ?? "");
+                  handlePostMenuClose();
+                }}
+              >
+                Edit Post
+              </MenuItem>
               <MenuItem onClick={handleDeletePost}>Delete Post</MenuItem>
             </Menu>
           </>
@@ -233,11 +261,68 @@ export default function PostCard({
         })}
       />
       <CardContent>
-        <Typography variant="body2" sx={{ color: "text.secondary" }}>
-          {post.body}
-        </Typography>
+        {isEditingPost ? (
+          <>
+            <TextField
+              fullWidth
+              multiline
+              size="small"
+              value={editedPostBody}
+              onChange={(e) => setEditedPostBody(e.target.value)}
+            />
+            <Box sx={{ mt: 2 }}>
+              <Button variant="outlined" component="label" size="small">
+                {editedPostImage ? "Change Image" : "Upload Image"}
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) setEditedPostImage(file);
+                  }}
+                />
+              </Button>
+              {editedPostImage && (
+                <Box sx={{ mt: 2 }}>
+                  <Image
+                    src={URL.createObjectURL(editedPostImage)}
+                    alt="Preview"
+                    width={700}
+                    height={400}
+                    style={{ width: "100%", height: "auto", borderRadius: 8 }}
+                  />
+                </Box>
+              )}
+            </Box>
+            <Box sx={{ textAlign: "right", mt: 2 }}>
+              <Button
+                variant="contained"
+                size="small"
+                onClick={handleEditPost}
+                disabled={editedPostBody.trim() === "" || updatingPost}
+              >
+                {updatingPost ? <CircularProgress size={18} /> : "Save"}
+              </Button>
+              <Button
+                size="small"
+                sx={{ ml: 1 }}
+                onClick={() => {
+                  setIsEditingPost(false);
+                  setEditedPostImage(null);
+                }}
+              >
+                Cancel
+              </Button>
+            </Box>
+          </>
+        ) : (
+          <Typography variant="body2" sx={{ color: "text.secondary" }}>
+            {post.body}
+          </Typography>
+        )}
       </CardContent>
-      {post.image && (
+      {post.image && !editedPostImage && (
         <Box sx={{ mt: 1 }}>
           <Image
             src={post.image}
@@ -417,7 +502,7 @@ export default function PostCard({
                       (c) => c._id === selectedCommentId
                     );
                     if (c) {
-                      setEditedContent(c.content);
+                      setEditedContent(c.content ?? "");
                       setEditingCommentId(selectedCommentId);
                     }
                     handleMenuClose();
@@ -427,9 +512,9 @@ export default function PostCard({
                 Edit
               </MenuItem>
               <MenuItem
-                onClick={() => {
-                  if (selectedCommentId) handleDeleteComment(selectedCommentId);
-                }}
+                onClick={() =>
+                  selectedCommentId && handleDeleteComment(selectedCommentId)
+                }
               >
                 Delete
               </MenuItem>
