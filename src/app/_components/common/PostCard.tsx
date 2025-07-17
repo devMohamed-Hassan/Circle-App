@@ -26,6 +26,13 @@ import { Post } from "../../_features/posts/types";
 import Image from "next/image";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import {
+  addComment,
+  deleteComment,
+  editComment,
+  editPost,
+  deletePost,
+} from "../../services/postService";
 
 interface ExpandMoreProps {
   expand: boolean;
@@ -105,17 +112,9 @@ export default function PostCard({
     if (newComment.trim() === "") return;
     try {
       setIsSubmitting(true);
-      const token = localStorage.getItem("userToken");
-      if (!token) return;
-      const res = await fetch("https://linked-posts.routemisr.com/comments", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", token: ` ${token}` },
-        body: JSON.stringify({ content: newComment, post: post._id }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
-      if (data.comments?.length)
-        setLocalComments((prev) => [data.comments[0], ...prev]);
+      const token = localStorage.getItem("userToken") || "";
+      const result = await addComment(post._id, newComment, token);
+      setLocalComments((prev) => [result, ...prev]);
       setNewComment("");
     } finally {
       setIsSubmitting(false);
@@ -123,20 +122,11 @@ export default function PostCard({
   };
 
   const handleDeleteComment = async (commentId: string) => {
-    const token = localStorage.getItem("userToken");
-    if (!token) return;
     const confirmed = confirm("Are you sure you want to delete this comment?");
     if (!confirmed) return;
     try {
-      const res = await fetch(
-        `https://linked-posts.routemisr.com/comments/${commentId}`,
-        {
-          method: "DELETE",
-          headers: { token },
-        }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+      const token = localStorage.getItem("userToken") || "";
+      await deleteComment(commentId, token);
       setLocalComments((prev) => prev.filter((c) => c._id !== commentId));
     } finally {
       handleMenuClose();
@@ -144,19 +134,10 @@ export default function PostCard({
   };
 
   const handleEditComment = async () => {
-    const token = localStorage.getItem("userToken");
-    if (!token || !editingCommentId || editedContent.trim() === "") return;
+    if (!editingCommentId || editedContent.trim() === "") return;
     try {
-      const res = await fetch(
-        `https://linked-posts.routemisr.com/comments/${editingCommentId}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json", token },
-          body: JSON.stringify({ content: editedContent }),
-        }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+      const token = localStorage.getItem("userToken") || "";
+      await editComment(editingCommentId, editedContent, token);
       setLocalComments((prev) =>
         prev.map((c) =>
           c._id === editingCommentId ? { ...c, content: editedContent } : c
@@ -168,25 +149,18 @@ export default function PostCard({
   };
 
   const handleEditPost = async () => {
-    const token = localStorage.getItem("userToken");
-    if (!token || editedPostBody.trim() === "") return;
+    if (editedPostBody.trim() === "") return;
     try {
       setUpdatingPost(true);
-      const formData = new FormData();
-      formData.append("body", editedPostBody);
-      if (editedPostImage) formData.append("image", editedPostImage);
-      const res = await fetch(
-        `https://linked-posts.routemisr.com/posts/${post._id}`,
-        {
-          method: "PUT",
-          headers: { token },
-          body: formData,
-        }
+      const token = localStorage.getItem("userToken") || "";
+      const updated = await editPost(
+        post._id,
+        editedPostBody,
+        token,
+        editedPostImage
       );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
-      post.body = data.post.body;
-      post.image = data.post.image;
+      post.body = updated.body;
+      post.image = updated.image;
       setIsEditingPost(false);
       setEditedPostImage(null);
     } finally {
@@ -195,20 +169,11 @@ export default function PostCard({
   };
 
   const handleDeletePost = async () => {
-    const token = localStorage.getItem("userToken");
-    if (!token) return;
     const confirmed = confirm("Are you sure you want to delete this post?");
     if (!confirmed) return;
     try {
-      const res = await fetch(
-        `https://linked-posts.routemisr.com/posts/${post._id}`,
-        {
-          method: "DELETE",
-          headers: { token },
-        }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+      const token = localStorage.getItem("userToken") || "";
+      await deletePost(post._id, token);
       onPostDeleted?.();
     } finally {
       handlePostMenuClose();
