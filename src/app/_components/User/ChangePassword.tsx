@@ -56,9 +56,6 @@ export default function ChangePassword() {
 
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 400 }}>
-      <Typography variant="h6" mb={2}>
-        Change Password
-      </Typography>
       <TextField
         label="Current Password"
         type="password"

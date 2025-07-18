@@ -1,6 +1,6 @@
 "use client";
 
-import { Roboto, Inter } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { ReactNode } from "react";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
@@ -9,11 +9,6 @@ import { Provider } from "react-redux";
 import { store } from "../store/store";
 import { Container } from "@mui/material";
 import { Toaster } from "react-hot-toast";
-
-const roboto = Roboto({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-});
 
 const inter = Inter({
   subsets: ["latin"],
@@ -24,14 +19,18 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta charSet="UTF-8" />
+        <meta name="theme-color" content="#ffffff" />
         <link rel="icon" href="/logo.svg" type="image/svg+xml" />
+        <title>My App</title>
       </head>
       <body
         style={{
-          fontFamily: roboto.style.fontFamily,
+          fontFamily: inter.style.fontFamily,
           color: "var(--foreground)",
-          backgroundColor: "var(--background)",
-          ["--font-heading" as any]: inter.style.fontFamily,
+          background: "linear-gradient(to right, #f5f7fa, #c3cfe2)",
+          minHeight: "100vh",
         }}
       >
         <Provider store={store}>
@@ -40,17 +39,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <Container
               maxWidth="md"
               sx={{
-                mt: 5,
-                color: "#000000",
-                background: "var(--background)",
-                borderRadius: "var(--border-radius)",
-                boxShadow: "0 4px 24px rgba(0,0,0,0.07)",
-                p: { xs: 2, md: 4 },
+                mt: { xs: 4, md: 8 },
+                mb: { xs: 4, md: 8 },
+                borderRadius: "16px",
+                p: { xs: 2, sm: 4 },
+                minHeight: "calc(100vh - 160px)",
               }}
             >
               {children}
             </Container>
-            <Toaster position="top-right" />
+            <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
           </AppRouterCacheProvider>
         </Provider>
       </body>

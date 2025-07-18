@@ -88,7 +88,6 @@ export default function Register() {
 
   return (
     <Box
-      minHeight="100vh"
       display="flex"
       alignItems="center"
       justifyContent="center"

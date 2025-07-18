@@ -59,11 +59,9 @@ export default function CreatePost() {
 
   return (
     <Box
-      minHeight="100vh"
       display="flex"
       justifyContent="center"
       alignItems="center"
-      bgcolor="#f8fafc"
       p={2}
     >
       <Paper
@@ -128,9 +126,6 @@ export default function CreatePost() {
               color: "#fff",
               fontWeight: 600,
               borderRadius: 2,
-              "&:hover": {
-                background: "var(--primary-dark)",
-              },
             }}
           >
             {loading ? "Posting..." : "Post"}
