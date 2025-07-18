@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   TextField,
-  Typography,
   CircularProgress,
 } from "@mui/material";
 import toast from "react-hot-toast";

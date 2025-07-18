@@ -17,7 +17,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
-import { RootState, store } from "@/store/store";
+import { RootState } from "@/store/store";
 import { removeToken, setToken, setUser } from "@/app/_features/auth/authSlice";
 
 const Navbar = () => {

@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { Post } from "./types";
 
 const initialState = {
-  isLoading: false as Boolean,
+  isLoading: false as boolean,
   posts: [] as Post[],
   post: null as Post | null,
   error: null as any,
