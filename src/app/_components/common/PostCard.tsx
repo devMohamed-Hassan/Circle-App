@@ -34,11 +34,9 @@ import {
   deletePost,
 } from "../../services/postService";
 
-interface ExpandMoreProps {}
-
 const ExpandMore = styled((props: React.ComponentProps<typeof IconButton>) => {
   return <IconButton {...props} />;
-})<ExpandMoreProps>(() => ({
+})<object>(() => ({
   marginLeft: "auto",
 }));
 
