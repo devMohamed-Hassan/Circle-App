@@ -55,8 +55,12 @@ export default function Login() {
       setTimeout(() => {
         router.push("/");
       }, 1500);
-    } catch (err: any) {
-      dispatch(setError(err.message || "Unknown error"));
+    } catch (err: unknown) {
+      if (err && typeof err === "object" && "message" in err) {
+        dispatch(setError((err as { message?: string }).message || "Unknown error"));
+      } else {
+        dispatch(setError("Unknown error"));
+      }
     } finally {
       dispatch(setDone());
     }

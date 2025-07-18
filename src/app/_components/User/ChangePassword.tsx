@@ -46,8 +46,12 @@ export default function ChangePassword() {
         localStorage.removeItem("userToken");
         router.push("/login");
       }, 2000);
-    } catch (err: any) {
-      toast.error(err.message || "Something went wrong");
+    } catch (err: unknown) {
+      if (err && typeof err === "object" && "message" in err) {
+        toast.error((err as { message?: string }).message || "Something went wrong");
+      } else {
+        toast.error("Something went wrong");
+      }
     } finally {
       setIsLoading(false);
     }

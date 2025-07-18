@@ -38,7 +38,7 @@ interface ExpandMoreProps {
   expand: boolean;
 }
 
-const ExpandMore = styled((props: ExpandMoreProps & any) => {
+const ExpandMore = styled((props: ExpandMoreProps & React.ComponentProps<typeof IconButton>) => {
   const { expand, ...other } = props;
   return <IconButton {...other} />;
 })<ExpandMoreProps>(({ theme, expand }) => ({

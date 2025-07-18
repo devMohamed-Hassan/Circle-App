@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import toast from "react-hot-toast";
-import { AuthState, User } from "./types";
+import { AuthState } from "./types";
 
 const initialState: AuthState = {
   token: null,

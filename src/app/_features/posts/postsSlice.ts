@@ -5,7 +5,7 @@ const initialState = {
   isLoading: false as boolean,
   posts: [] as Post[],
   post: null as Post | null,
-  error: null as any,
+  error: null as unknown,
 };
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;

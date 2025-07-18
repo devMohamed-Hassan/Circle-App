@@ -15,7 +15,7 @@ export default function SinglePost() {
   const dispatch = useDispatch<StoreDispatch>();
   useEffect(() => {
     dispatch(getPost(`${postId}`));
-  }, []);
+  }, [dispatch, postId]);
   if (isLoading) {
     return <Loading />;
   }

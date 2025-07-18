@@ -19,6 +19,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import { RootState } from "@/store/store";
 import { removeToken, setToken, setUser } from "@/app/_features/auth/authSlice";
+import Image from "next/image";
 
 const Navbar = () => {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
@@ -96,10 +97,12 @@ const Navbar = () => {
         <Toolbar disableGutters sx={{ justifyContent: "space-between" }}>
           {/* Logo */}
           <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>
-            <img
+            <Image
               src="/logo.svg"
               alt="Circle Logo"
-              style={{ height: 36, width: 36, marginRight: 8 }}
+              width={36}
+              height={36}
+              style={{ marginRight: 8 }}
             />
             <Typography
               variant="h6"

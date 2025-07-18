@@ -48,8 +48,12 @@ export default function CreatePost() {
       setTimeout(() => {
         router.push("/");
       }, 1500);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to create post. Please try again.");
+    } catch (error: unknown) {
+      if (error && typeof error === "object" && "message" in error) {
+        toast.error((error as { message?: string }).message || "Failed to create post. Please try again.");
+      } else {
+        toast.error("Failed to create post. Please try again.");
+      }
     } finally {
       setLoading(false);
     }

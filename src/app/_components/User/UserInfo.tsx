@@ -133,8 +133,12 @@ export default function UserInfo() {
       }
 
       setPreview(null);
-    } catch (err: any) {
-      toast.error(err.message || "Upload failed");
+    } catch (err: unknown) {
+      if (err && typeof err === "object" && "message" in err) {
+        toast.error((err as { message?: string }).message || "Upload failed");
+      } else {
+        toast.error("Upload failed");
+      }
     } finally {
       setUploading(false);
     }
