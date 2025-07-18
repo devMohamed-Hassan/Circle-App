@@ -1,7 +1,4 @@
-<h1 style="display: flex; align-items: center; gap: 12px;">
-  <img src="/public/logo.svg" alt="Circle Icon" width="40" height="40">
-  <span>Circle</span>
-</h1>
+# Circle
 
 
 
