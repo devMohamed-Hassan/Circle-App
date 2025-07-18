@@ -34,19 +34,12 @@ import {
   deletePost,
 } from "../../services/postService";
 
-interface ExpandMoreProps {
-  expand: boolean;
-}
+interface ExpandMoreProps {}
 
-const ExpandMore = styled((props: ExpandMoreProps & React.ComponentProps<typeof IconButton>) => {
-  const { expand, ...other } = props;
-  return <IconButton {...other} />;
-})<ExpandMoreProps>(({ theme, expand }) => ({
+const ExpandMore = styled((props: React.ComponentProps<typeof IconButton>) => {
+  return <IconButton {...props} />;
+})<ExpandMoreProps>(() => ({
   marginLeft: "auto",
-  transform: expand ? "rotate(180deg)" : "rotate(0deg)",
-  transition: theme.transitions.create("transform", {
-    duration: theme.transitions.duration.shortest,
-  }),
 }));
 
 export default function PostCard({
