@@ -23,7 +23,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <meta charSet="UTF-8" />
         <meta name="theme-color" content="#ffffff" />
         <link rel="icon" href="/logo.svg" type="image/svg+xml" />
-        <title>My App</title>
+        <title>Circle | Social App</title>
       </head>
       <body
         style={{
