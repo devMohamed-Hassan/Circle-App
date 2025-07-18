@@ -20,6 +20,8 @@ import {
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 export default function Login() {
   const isLoading = useSelector(
     (store: RootState) => store.authReducer.isLoading
@@ -32,7 +34,7 @@ export default function Login() {
       dispatch(setLoading());
 
       const res = await fetch(
-        `https://linked-posts.routemisr.com/users/signin`,
+        `${API_BASE_URL}/users/signin`,
         {
           method: "POST",
           body: JSON.stringify(values),

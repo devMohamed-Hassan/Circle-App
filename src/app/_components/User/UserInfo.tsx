@@ -15,6 +15,8 @@ import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/app/_features/auth/authSlice";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 export default function UserInfo() {
   const [user, setUserLocal] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -31,7 +33,7 @@ export default function UserInfo() {
     const fetchProfile = async () => {
       try {
         const res = await fetch(
-          "https://linked-posts.routemisr.com/users/profile-data",
+          `${API_BASE_URL}/users/profile-data`,
           {
             headers: {
               token: token,
@@ -87,7 +89,7 @@ export default function UserInfo() {
       setUploading(true);
 
       const res = await fetch(
-        "https://linked-posts.routemisr.com/users/upload-photo",
+        `${API_BASE_URL}/users/upload-photo`,
         {
           method: "PUT",
           headers: {

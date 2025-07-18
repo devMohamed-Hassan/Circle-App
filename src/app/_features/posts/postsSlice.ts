@@ -8,9 +8,11 @@ const initialState = {
   error: null as any,
 };
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 export const getPosts = createAsyncThunk("posts/getPosts", async () => {
   const response = await fetch(
-    `https://linked-posts.routemisr.com/posts?limit=50&sort=-createdAt`,
+    `${API_BASE_URL}/posts?limit=50&sort=-createdAt`,
     {
       method: "GET",
       headers: {
@@ -27,7 +29,7 @@ export const getPost = createAsyncThunk(
   "posts/getPost",
   async (postId: string) => {
     const response = await fetch(
-      `https://linked-posts.routemisr.com/posts/${postId}`,
+      `${API_BASE_URL}/posts/${postId}`,
       {
         method: "GET",
         headers: {
@@ -45,7 +47,7 @@ export const getUserPosts = createAsyncThunk(
   "posts/getUserPosts",
   async (userId: string) => {
     const response = await fetch(
-      `https://linked-posts.routemisr.com/users/${userId}/posts`,
+      `${API_BASE_URL}/users/${userId}/posts`,
       {
         method: "GET",
         headers: {

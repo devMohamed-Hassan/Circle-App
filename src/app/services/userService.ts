@@ -1,5 +1,7 @@
 import toast from "react-hot-toast";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 export const uploadUserPhoto = async (
   file: File,
   fallbackPreview?: string
@@ -12,7 +14,7 @@ export const uploadUserPhoto = async (
 
   try {
     const res = await fetch(
-      "https://linked-posts.routemisr.com/users/upload-photo",
+      `${API_BASE_URL}/users/upload-photo`,
       {
         method: "PUT",
         headers: { token },
@@ -51,7 +53,7 @@ export async function updatePassword(
   token: string
 ): Promise<void> {
   const res = await fetch(
-    "https://linked-posts.routemisr.com/users/change-password",
+    `${API_BASE_URL}/users/change-password`,
     {
       method: "PATCH",
       headers: {

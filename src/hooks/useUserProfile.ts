@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { UserProfile } from "@/types";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 export const useUserProfile = () => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -12,7 +14,7 @@ export const useUserProfile = () => {
     const fetchUser = async () => {
       try {
         const res = await fetch(
-          "https://linked-posts.routemisr.com/users/profile-data",
+          `${API_BASE_URL}/users/profile-data`,
           { headers: { token } }
         );
         const data = await res.json();

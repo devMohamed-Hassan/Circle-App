@@ -1,9 +1,11 @@
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 export const addComment = async (
   postId: string,
   content: string,
   token: string
 ) => {
-  const res = await fetch("https://linked-posts.routemisr.com/comments", {
+  const res = await fetch(`${API_BASE_URL}/comments`, {
     method: "POST",
     headers: { "Content-Type": "application/json", token: ` ${token}` },
     body: JSON.stringify({ content, post: postId }),
@@ -15,7 +17,7 @@ export const addComment = async (
 
 export const deleteComment = async (commentId: string, token: string) => {
   const res = await fetch(
-    `https://linked-posts.routemisr.com/comments/${commentId}`,
+    `${API_BASE_URL}/comments/${commentId}`,
     {
       method: "DELETE",
       headers: { token },
@@ -32,7 +34,7 @@ export const editComment = async (
   token: string
 ) => {
   const res = await fetch(
-    `https://linked-posts.routemisr.com/comments/${commentId}`,
+    `${API_BASE_URL}/comments/${commentId}`,
     {
       method: "PUT",
       headers: { "Content-Type": "application/json", token },
@@ -55,7 +57,7 @@ export const editPost = async (
   if (image) formData.append("image", image);
 
   const res = await fetch(
-    `https://linked-posts.routemisr.com/posts/${postId}`,
+    `${API_BASE_URL}/posts/${postId}`,
     {
       method: "PUT",
       headers: { token },
@@ -69,7 +71,7 @@ export const editPost = async (
 
 export const deletePost = async (postId: string, token: string) => {
   const res = await fetch(
-    `https://linked-posts.routemisr.com/posts/${postId}`,
+    `${API_BASE_URL}/posts/${postId}`,
     {
       method: "DELETE",
       headers: { token },

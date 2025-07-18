@@ -13,6 +13,8 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 export default function CreatePost() {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -30,7 +32,7 @@ export default function CreatePost() {
         formData.append("image", imageFile);
       }
 
-      const response = await fetch("https://linked-posts.routemisr.com/posts", {
+      const response = await fetch(`${API_BASE_URL}/posts`, {
         method: "POST",
         body: formData,
         headers: {
