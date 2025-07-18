@@ -1,4 +1,9 @@
-# Circle
+<h1 style="display: flex; align-items: center; gap: 12px;">
+  <img src="/public/logo.svg" alt="Circle Icon" width="40" height="40">
+  <span>Circle</span>
+</h1>
+
+
 
 A modern social app built with **Next.js** and **MUI**. This project demonstrates best practices in **Next.js**, **Redux**, **MUI**, and modular component design.
 
