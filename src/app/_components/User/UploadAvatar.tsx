@@ -1,13 +1,8 @@
 "use client";
+import { Props } from "@/types";
 import { Avatar, Button, Box } from "@mui/material";
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
-
-interface Props {
-  userPhoto: string;
-  uploading: boolean;
-  onUpload: (file: File, preview: string) => void;
-}
 
 export default function UploadAvatar({
   userPhoto,

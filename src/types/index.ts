@@ -11,3 +11,9 @@ export interface UserProfile {
   dateOfBirth: string;
   photo: string;
 }
+
+export interface Props {
+  userPhoto: string;
+  uploading: boolean;
+  onUpload: (file: File, preview: string) => void;
+}
