@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { jwtDecode } from "jwt-decode";
-import { Typography, CircularProgress } from "@mui/material";
+import { Typography, LinearProgress } from "@mui/material";
 import PostCard from "../common/PostCard";
 import { RootState, StoreDispatch } from "@/store/store";
 import { getUserPosts } from "../../_features/posts/postsSlice";
@@ -32,11 +32,9 @@ export default function MyPosts() {
 
   return (
     <>
-      <Typography variant="h6" gutterBottom>
-        My Posts
-      </Typography>
+     
       {isLoading ? (
-        <CircularProgress />
+       <LinearProgress />
       ) : posts.length > 0 ? (
         posts.map((post) => (
           <PostCard

@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getPosts } from "./_features/posts/postsSlice";
 import { RootState, StoreDispatch } from "../store/store";
 import PostCard from "./_components/common/PostCard";
+import { LinearProgress } from "@mui/material";
 
 export default function Home() {
   const router = useRouter();
@@ -25,7 +26,7 @@ export default function Home() {
   }, [router, dispatch]);
 
   if (authenticated) return null;
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) return <LinearProgress />;
 
   return (
     <div className="main">

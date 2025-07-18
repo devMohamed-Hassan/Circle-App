@@ -4,10 +4,10 @@ import {
   Box,
   Typography,
   Avatar,
-  CircularProgress,
   Divider,
   Paper,
   Button,
+  LinearProgress,
 } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { UserProfile } from "../../../types/index";
@@ -32,14 +32,11 @@ export default function UserInfo() {
 
     const fetchProfile = async () => {
       try {
-        const res = await fetch(
-          `${API_BASE_URL}/users/profile-data`,
-          {
-            headers: {
-              token: token,
-            },
-          }
-        );
+        const res = await fetch(`${API_BASE_URL}/users/profile-data`, {
+          headers: {
+            token: token,
+          },
+        });
 
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Failed to fetch profile");
@@ -88,16 +85,13 @@ export default function UserInfo() {
     try {
       setUploading(true);
 
-      const res = await fetch(
-        `${API_BASE_URL}/users/upload-photo`,
-        {
-          method: "PUT",
-          headers: {
-            token: `${token}`,
-          },
-          body: formData,
-        }
-      );
+      const res = await fetch(`${API_BASE_URL}/users/upload-photo`, {
+        method: "PUT",
+        headers: {
+          token: `${token}`,
+        },
+        body: formData,
+      });
 
       const contentType = res.headers.get("content-type");
       if (!contentType?.includes("application/json")) {
@@ -146,7 +140,7 @@ export default function UserInfo() {
     }
   };
 
-  if (loading) return <CircularProgress />;
+  if (loading) return <LinearProgress />;
 
   if (!user)
     return (
@@ -165,10 +159,6 @@ export default function UserInfo() {
         bgcolor: "#fdfdfd",
       }}
     >
-      <Typography variant="h6" fontWeight="bold" gutterBottom color="primary">
-        My Info
-      </Typography>
-
       <Avatar
         src={preview || user.photo || "/default-avatar.png"}
         sx={{
