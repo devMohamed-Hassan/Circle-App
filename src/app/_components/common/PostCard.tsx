@@ -296,7 +296,6 @@ export default function PostCard({
           <ThumbUpIcon />
         </IconButton>
         <ExpandMore
-          expand={expanded}
           onClick={handleExpandClick}
           aria-expanded={expanded}
         >
