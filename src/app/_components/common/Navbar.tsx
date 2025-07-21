@@ -121,7 +121,7 @@ const Navbar = () => {
           </Box>
 
           {/* Mobile Menu */}
-          <Box sx={{ display: { xs: "flex", md: "none" } }}>
+          {isAuthenticated && <Box sx={{ display: { xs: "flex", md: "none" } }}>
             <IconButton
               size="large"
               onClick={handleOpenNavMenu}
@@ -134,8 +134,7 @@ const Navbar = () => {
               open={Boolean(anchorElNav)}
               onClose={handleCloseNavMenu}
             >
-              {isAuthenticated &&
-                navItems.map((item) => (
+                {navItems.map((item) => (
                   <MenuItem
                     key={item.href}
                     component={Link}
@@ -146,7 +145,7 @@ const Navbar = () => {
                   </MenuItem>
                 ))}
             </Menu>
-          </Box>
+          </Box>}
 
           {/* Desktop Menu */}
           <Box sx={{ display: { xs: "none", md: "flex" }, gap: 2 }}>
