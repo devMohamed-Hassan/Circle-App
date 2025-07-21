@@ -35,3 +35,4 @@ export interface Comment {
   post: string;
   createdAt: string;
 }
+
