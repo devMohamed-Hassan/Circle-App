@@ -1,8 +1,12 @@
 # Circle
 
-
-
 A modern social app built with **Next.js** and **MUI**. This project demonstrates best practices in **Next.js**, **Redux**, **MUI**, and modular component design.
+
+| Home | Account |
+|------|----------------|
+| ![Home](public/screenshots/home.png) | ![Account Overview](public/screenshots/account.png) |
+
+
 
 
 ## Features
@@ -17,13 +21,6 @@ A modern social app built with **Next.js** and **MUI**. This project demonstrate
 - **Language:** TypeScript
 - **UI Library:** [Material-UI (MUI)](https://mui.com/) for modern, accessible, and customizable components
 
-## Home Page  
-![Home](public/screenshots/home.png)
+#
+[Live Demo](https://circle-app-puce.vercel.app/)
 
-
-### Account Overview  
-![Account Overview](public/screenshots/account.png)
-
----
-## 🤝 Contributing
-Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.
